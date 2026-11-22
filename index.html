@@ -5,91 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>I2C Sensor Decoder | Walid Gali</title>
     <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --accent: #38bdf8;
-            --accent-hover: #0ea5e9;
-            --border: #334155;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            max-width: 600px;
-            width: 100%;
-            background: var(--card);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            margin-top: 20px;
-        }
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #38bdf8; --accent-hover: #0ea5e9; --border: #334155; --code-bg: #000; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { max-width: 600px; width: 100%; background: var(--card); padding: 30px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 25px rgba(0,0,0,0.5); margin-top: 20px; }
         h1 { color: var(--accent); text-align: center; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; font-size: 14px; }
         label { display: block; margin-bottom: 8px; font-weight: bold; color: #cbd5e1; }
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text);
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        button {
-            width: 100%;
-            padding: 14px;
-            background: var(--accent);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        select, input { width: 100%; padding: 12px; margin-bottom: 20px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 16px; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; background: var(--accent); color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: var(--accent-hover); }
-        .result-box {
-            margin-top: 20px;
-            padding: 20px;
-            background: #0f172a;
-            border-radius: 8px;
-            border-left: 4px solid var(--accent);
-            display: none;
-        }
+        
+        .result-box { margin-top: 20px; padding: 20px; background: var(--bg); border-radius: 8px; border-left: 4px solid var(--accent); display: none; }
         .result-value { font-size: 24px; font-weight: bold; color: var(--accent); margin: 10px 0; }
-        .result-formula { font-size: 14px; color: #94a3b8; font-family: monospace; }
-        .cta-banner {
-            margin-top: 40px;
-            padding: 20px;
-            background: linear-gradient(90deg, #1e293b, #0f172a);
-            border: 1px solid var(--accent);
-            border-radius: 8px;
-            text-align: center;
-        }
+        .result-formula { font-size: 14px; color: #94a3b8; font-family: monospace; margin-bottom: 20px;}
+        
+        .code-section { margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .code-label { font-size: 12px; color: #cbd5e1; font-weight: bold; }
+        .copy-btn { background: #334155; color: #fff; padding: 6px 12px; font-size: 12px; width: auto; border-radius: 4px; cursor: pointer; border: none; }
+        .copy-btn:hover { background: #475569; }
+        .code-box { background: var(--code-bg); padding: 15px; border-radius: 6px; font-family: monospace; font-size: 12px; color: #a5b4fc; overflow-x: auto; margin-bottom: 10px; border: 1px solid #333; white-space: pre-wrap;}
+
+        .cta-banner { margin-top: 40px; padding: 20px; background: linear-gradient(90deg, #1e293b, #0f172a); border: 1px solid var(--accent); border-radius: 8px; text-align: center; }
         .cta-banner h3 { margin: 0 0 10px 0; color: var(--accent); }
         .cta-banner p { font-size: 14px; color: #cbd5e1; margin-bottom: 15px; }
-        .cta-banner a {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #fff;
-            color: #000;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-        }
+        .cta-banner a { display: inline-block; padding: 10px 20px; background: #fff; color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; }
         .cta-banner a:hover { background: var(--accent); }
         footer { margin-top: 40px; color: #64748b; font-size: 12px; text-align: center; }
         footer a { color: var(--accent); text-decoration: none; }
@@ -99,7 +39,7 @@
 
     <div class="container">
         <h1>I2C Sensor Decoder</h1>
-        <p class="subtitle">Convert raw I2C register values into physical data instantly.</p>
+        <p class="subtitle">Convert raw I2C register values into physical data, C code, and JSON.</p>
 
         <label for="sensorType">Select Sensor:</label>
         <select id="sensorType" onchange="updateInputHint()">
@@ -116,6 +56,24 @@
             <div style="color: #cbd5e1; margin-bottom: 5px;">Calculated Result:</div>
             <div id="finalValue" class="result-value">--</div>
             <div id="formula" class="result-formula">--</div>
+            
+            <!-- C Code Section -->
+            <div class="code-section">
+                <div class="code-header">
+                    <span class="code-label">C Code Snippet:</span>
+                    <button class="copy-btn" onclick="copyToClipboard('cCodeOutput', 'C Code')">Copy C</button>
+                </div>
+                <div id="cCodeOutput" class="code-box"></div>
+            </div>
+
+            <!-- JSON Section -->
+            <div class="code-section">
+                <div class="code-header">
+                    <span class="code-label">JSON Payload:</span>
+                    <button class="copy-btn" onclick="copyToClipboard('jsonCodeOutput', 'JSON')">Copy JSON</button>
+                </div>
+                <div id="jsonCodeOutput" class="code-box" style="color: #fde047;"></div>
+            </div>
         </div>
     </div>
 
@@ -135,7 +93,7 @@
         function updateInputHint() {
             const sensor = document.getElementById('sensorType').value;
             const input = document.getElementById('rawValue');
-            if (sensor === 'tmp102') input.placeholder = "e.g., 0x1900 (for 25°C)";
+            if (sensor === 'tmp102') input.placeholder = "e.g., 0x1900 (for 25°C) or 0xFFF0 (for -1°C)";
             if (sensor === 'ina219') input.placeholder = "e.g., 0x2710 (for 20V)";
             document.getElementById('result').style.display = 'none';
         }
@@ -144,46 +102,71 @@
             const sensor = document.getElementById('sensorType').value;
             const rawInput = document.getElementById('rawValue').value;
             const resultBox = document.getElementById('result');
-            const finalValue = document.getElementById('finalValue');
-            const formula = document.getElementById('formula');
-
-            // Parse Hex or Decimal
+            
             let raw = 0;
-            if (rawInput.startsWith('0x') || rawInput.startsWith('0X')) {
-                raw = parseInt(rawInput, 16);
-            } else {
-                raw = parseInt(rawInput, 10);
-            }
+            if (rawInput.toLowerCase().startsWith('0x')) { raw = parseInt(rawInput, 16); } else { raw = parseInt(rawInput, 10); }
 
-            if (isNaN(raw)) {
-                alert("Please enter a valid Hex (0x...) or Decimal number.");
-                return;
-            }
+            if (isNaN(raw)) { alert("Please enter a valid Hex (0x...) or Decimal number."); return; }
 
-            let value = 0;
-            let unit = "";
-            let formulaText = "";
+            let value = 0, unit = "", formulaText = "", cCode = "", jsonObj = {};
+
+            // Generate ISO Timestamp
+            const timestamp = new Date().toISOString();
 
             if (sensor === 'tmp102') {
-                // TMP102: 12-bit, shift right 4, scale 0.0625 C/LSB
+                // Handle 12-bit signed temperature correctly for JavaScript
                 let shifted = raw >> 4;
+                if (shifted >= 2048) { 
+                    shifted -= 4096; // Two's complement conversion for negative temperatures
+                }
+                
                 value = (shifted * 0.0625).toFixed(2);
-                unit = "°C";
+                unit = "Celsius";
                 formulaText = `(${rawInput} >> 4) * 0.0625 = ${value} °C`;
+                
+                cCode = `// TMP102 Reading\nint16_t raw = (buf[0] << 8) | buf[1];\nfloat temp = (raw >> 4) * 0.0625;\n// Result: ${value} °C`;
+                
+                jsonObj = {
+                    sensor: "TMP102",
+                    raw_hex: rawInput,
+                    temperature_c: parseFloat(value),
+                    timestamp: timestamp
+                };
             } else if (sensor === 'ina219') {
-                // INA219: Bus Voltage: shift right 3, scale 0.004 V/LSB
                 let shifted = raw >> 3;
                 value = (shifted * 0.004).toFixed(3);
-                unit = "V";
+                unit = "Volts";
                 formulaText = `(${rawInput} >> 3) * 0.004 = ${value} V`;
+                
+                cCode = `// INA219 Bus Voltage\nuint16_t raw = (buf[0] << 8) | buf[1];\nfloat voltage = (raw >> 3) * 0.004;\n// Result: ${value} V`;
+                
+                jsonObj = {
+                    sensor: "INA219",
+                    raw_hex: rawInput,
+                    bus_voltage_v: parseFloat(value),
+                    timestamp: timestamp
+                };
             }
 
-            finalValue.innerHTML = `${value} <span style="font-size: 16px; color: #cbd5e1;">${unit}</span>`;
-            formula.textContent = `Formula: ${formulaText}`;
+            document.getElementById('finalValue').innerHTML = `${value} <span style="font-size: 16px; color: #cbd5e1;">°${unit === 'Celsius' ? 'C' : 'V'}</span>`;
+            document.getElementById('formula').textContent = `Formula: ${formulaText}`;
+            
+            // Output C and JSON
+            document.getElementById('cCodeOutput').textContent = cCode;
+            document.getElementById('jsonCodeOutput').textContent = JSON.stringify(jsonObj, null, 4);
+            
             resultBox.style.display = 'block';
         }
+
+        function copyToClipboard(elementId, type) {
+            const codeText = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert(type + " copied to clipboard!");
+            }).catch(err => {
+                alert("Failed to copy: " + err);
+            });
+        }
         
-        // Initialize hint on load
         updateInputHint();
     </script>
 </body>

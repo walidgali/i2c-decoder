@@ -31,8 +31,32 @@
         .cta-banner p { font-size: 14px; color: #cbd5e1; margin-bottom: 15px; }
         .cta-banner a { display: inline-block; padding: 10px 20px; background: #fff; color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; }
         .cta-banner a:hover { background: var(--accent); }
-        footer { margin-top: 40px; color: #64748b; font-size: 12px; text-align: center; }
-        footer a { color: var(--accent); text-decoration: none; }
+        
+        /* Floating Support Button */
+        .support-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #ffdd00;
+            color: #000;
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(255, 221, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+            z-index: 1000;
+        }
+        .support-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(255, 221, 0, 0.6); }
+
+        /* Contact Footer */
+        .contact-footer { margin-top: 40px; text-align: center; padding-bottom: 40px; }
+        .contact-footer p { color: #94a3b8; font-size: 14px; }
+        .contact-footer a { color: var(--accent); text-decoration: none; font-weight: bold; }
+        .contact-footer a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
@@ -82,147 +106,47 @@
         </div>
     </div>
 
-    <footer>
-        Built by <a href="https://buymeacoffee.com/walidgali?new=1">Walid Gali</a> | Embedded Systems Engineer
-    </footer>
+    <div class="contact-footer">
+        <p>Need a custom C driver or hardware debugging? <br>
+        Contact me at: <a href="mailto:walidgali152@gmail.com">walidgali152@gmail.com</a></p>
+        <p>Built by <a href="https://github.com/walidgali">Walid Gali</a> | Embedded Systems Engineer</p>
+    </div>
+
+    <a href="https://www.buymeacoffee.com/walidgali" target="_blank" class="support-btn">
+        ☕ Support My Work
+    </a>
 
     <script>
-        // Helper for 16-bit signed integers
         const toSigned16 = (val) => val >= 32768 ? val - 65536 : val;
 
-        // Sensor Database
         const sensorDB = {
-            // --- Original 5 ---
-            tmp102: { 
-                name: "TMP102 (Temperature)", unit: "°C", ph: "0x1900 (25°C) or 0xFFF0 (-1°C)", 
-                calc: (r) => { let v = r >> 4; v = (v & 0x800) ? v - 0x1000 : v; return v * 0.0625; }, 
-                cFormula: "((int16_t)raw >> 4) * 0.0625", jsonKey: "temperature_c" 
-            },
-            ina219: { 
-                name: "INA219 (Bus Voltage)", unit: "V", ph: "0x2710 (20V)", 
-                calc: (r) => (r >> 3) * 0.004, 
-                cFormula: "(raw >> 3) * 0.004", jsonKey: "bus_voltage_v" 
-            },
-            mpu6050: { 
-                name: "MPU6050 (Accel X)", unit: "g", ph: "0x4000 (1g)", 
-                calc: (r) => toSigned16(r) / 16384.0, 
-                cFormula: "(int16_t)raw / 16384.0", jsonKey: "acceleration_g" 
-            },
-            sht31: { 
-                name: "SHT31 (Temperature)", unit: "°C", ph: "0x6666 (25°C)", 
-                calc: (r) => -45.0 + (175.0 * (r / 65535.0)), 
-                cFormula: "-45.0 + (175.0 * (raw / 65535.0))", jsonKey: "temperature_c" 
-            },
-            ads1115: { 
-                name: "ADS1115 (ADC Voltage)", unit: "V", ph: "0x7FFF (4.09V)", 
-                calc: (r) => toSigned16(r) * 0.000125, 
-                cFormula: "(int16_t)raw * 0.000125", jsonKey: "voltage_v" 
-            },
-
-            // --- 20 New Sensors ---
-            lm75: { 
-                name: "LM75 (Temperature)", unit: "°C", ph: "0x1900 (25°C)", 
-                calc: (r) => { let v = r >> 5; v = (v & 0x400) ? v - 0x800 : v; return v * 0.125; }, 
-                cFormula: "((int16_t)raw >> 5) * 0.125", jsonKey: "temperature_c" 
-            },
-            mcp9808: { 
-                name: "MCP9808 (Temperature)", unit: "°C", ph: "0x1900 (25°C)", 
-                calc: (r) => { let v = r & 0x1FFF; v = (v & 0x1000) ? v - 0x2000 : v; return v * 0.0625; }, 
-                cFormula: "((raw & 0x1FFF) & 0x1000 ? (raw & 0x1FFF) - 0x2000 : (raw & 0x1FFF)) * 0.0625", jsonKey: "temperature_c" 
-            },
-            si7021: { 
-                name: "Si7021 (Temperature)", unit: "°C", ph: "0x6666 (25°C)", 
-                calc: (r) => -46.85 + (175.72 * r / 65536), 
-                cFormula: "-46.85 + (175.72 * raw / 65536.0)", jsonKey: "temperature_c" 
-            },
-            sht20: { 
-                name: "SHT20 (Temperature)", unit: "°C", ph: "0x6666 (25°C)", 
-                calc: (r) => -46.85 + (175.72 * r / 65536), 
-                cFormula: "-46.85 + (175.72 * raw / 65536.0)", jsonKey: "temperature_c" 
-            },
-            mlx90614: { 
-                name: "MLX90614 (IR Temp)", unit: "°C", ph: "0x3C00 (36°C)", 
-                calc: (r) => (r * 0.02) - 273.15, 
-                cFormula: "(raw * 0.02) - 273.15", jsonKey: "temperature_c" 
-            },
-            adxl345: { 
-                name: "ADXL345 (Accel)", unit: "g", ph: "0x0100 (1g)", 
-                calc: (r) => toSigned16(r) * 0.0039, 
-                cFormula: "(int16_t)raw * 0.0039", jsonKey: "acceleration_g" 
-            },
-            lsm6ds3: { 
-                name: "LSM6DS3 (Accel)", unit: "g", ph: "0x4000 (1g)", 
-                calc: (r) => toSigned16(r) * 0.000061, 
-                cFormula: "(int16_t)raw * 0.000061", jsonKey: "acceleration_g" 
-            },
-            icm20948: { 
-                name: "ICM20948 (Accel)", unit: "g", ph: "0x4000 (1g)", 
-                calc: (r) => toSigned16(r) / 16384.0, 
-                cFormula: "(int16_t)raw / 16384.0", jsonKey: "acceleration_g" 
-            },
-            bmi160: { 
-                name: "BMI160 (Accel)", unit: "g", ph: "0x4000 (1g)", 
-                calc: (r) => toSigned16(r) / 16384.0, 
-                cFormula: "(int16_t)raw / 16384.0", jsonKey: "acceleration_g" 
-            },
-            hmc5883l: { 
-                name: "HMC5883L (Magnetometer)", unit: "mG", ph: "0x0100", 
-                calc: (r) => toSigned16(r) * 0.92, 
-                cFormula: "(int16_t)raw * 0.92", jsonKey: "magnetic_mG" 
-            },
-            qmc5883l: { 
-                name: "QMC5883L (Magnetometer)", unit: "mG", ph: "0x0100", 
-                calc: (r) => toSigned16(r) * 1.0, 
-                cFormula: "(int16_t)raw * 1.0", jsonKey: "magnetic_mG" 
-            },
-            bh1750: { 
-                name: "BH1750 (Light)", unit: "lux", ph: "0x0080 (106 lux)", 
-                calc: (r) => r / 1.2, 
-                cFormula: "raw / 1.2", jsonKey: "light_lux" 
-            },
-            veml7700: { 
-                name: "VEML7700 (Light)", unit: "lux", ph: "0x0100", 
-                calc: (r) => r * 0.0036, 
-                cFormula: "raw * 0.0036", jsonKey: "light_lux" 
-            },
-            vl6180x: { 
-                name: "VL6180X (Distance)", unit: "mm", ph: "0x0064 (100mm)", 
-                calc: (r) => r, 
-                cFormula: "raw", jsonKey: "distance_mm" 
-            },
-            ina226: { 
-                name: "INA226 (Bus Voltage)", unit: "V", ph: "0x2710", 
-                calc: (r) => toSigned16(r) * 0.00125, 
-                cFormula: "(int16_t)raw * 0.00125", jsonKey: "bus_voltage_v" 
-            },
-            max17048: { 
-                name: "MAX17048 (Battery V)", unit: "V", ph: "0xA000", 
-                calc: (r) => r * 0.000078125, 
-                cFormula: "raw * 0.000078125", jsonKey: "voltage_v" 
-            },
-            ads1015: { 
-                name: "ADS1015 (ADC)", unit: "V", ph: "0x0400", 
-                calc: (r) => toSigned16(r) * 0.003, 
-                cFormula: "(int16_t)raw * 0.003", jsonKey: "voltage_v" 
-            },
-            mcp3421: { 
-                name: "MCP3421 (ADC)", unit: "V", ph: "0x0100", 
-                calc: (r) => toSigned16(r) * 0.000015625, 
-                cFormula: "(int16_t)raw * 0.000015625", jsonKey: "voltage_v" 
-            },
-            lps25hb: { 
-                name: "LPS25HB (Pressure)", unit: "hPa", ph: "0x3E80 (1000hPa)", 
-                calc: (r) => r / 4096.0, 
-                cFormula: "raw / 4096.0", jsonKey: "pressure_hPa" 
-            },
-            ccs811: { 
-                name: "CCS811 (eCO2)", unit: "ppm", ph: "0x0190", 
-                calc: (r) => r, 
-                cFormula: "raw", jsonKey: "eco2_ppm" 
-            }
+            tmp102: { name: "TMP102 (Temperature)", unit: "°C", ph: "0x1900 (25°C) or 0xFFF0 (-1°C)", calc: (r) => { let v = r >> 4; v = (v & 0x800) ? v - 0x1000 : v; return v * 0.0625; }, cFormula: "((int16_t)raw >> 4) * 0.0625", jsonKey: "temperature_c" },
+            ina219: { name: "INA219 (Bus Voltage)", unit: "V", ph: "0x2710 (20V)", calc: (r) => (r >> 3) * 0.004, cFormula: "(raw >> 3) * 0.004", jsonKey: "bus_voltage_v" },
+            mpu6050: { name: "MPU6050 (Accel X)", unit: "g", ph: "0x4000 (1g)", calc: (r) => toSigned16(r) / 16384.0, cFormula: "(int16_t)raw / 16384.0", jsonKey: "acceleration_g" },
+            sht31: { name: "SHT31 (Temperature)", unit: "°C", ph: "0x6666 (25°C)", calc: (r) => -45.0 + (175.0 * (r / 65535.0)), cFormula: "-45.0 + (175.0 * (raw / 65535.0))", jsonKey: "temperature_c" },
+            ads1115: { name: "ADS1115 (ADC Voltage)", unit: "V", ph: "0x7FFF (4.09V)", calc: (r) => toSigned16(r) * 0.000125, cFormula: "(int16_t)raw * 0.000125", jsonKey: "voltage_v" },
+            lm75: { name: "LM75 (Temperature)", unit: "°C", ph: "0x1900 (25°C)", calc: (r) => { let v = r >> 5; v = (v & 0x400) ? v - 0x800 : v; return v * 0.125; }, cFormula: "((int16_t)raw >> 5) * 0.125", jsonKey: "temperature_c" },
+            mcp9808: { name: "MCP9808 (Temperature)", unit: "°C", ph: "0x1900 (25°C)", calc: (r) => { let v = r & 0x1FFF; v = (v & 0x1000) ? v - 0x2000 : v; return v * 0.0625; }, cFormula: "((raw & 0x1FFF) & 0x1000 ? (raw & 0x1FFF) - 0x2000 : (raw & 0x1FFF)) * 0.0625", jsonKey: "temperature_c" },
+            si7021: { name: "Si7021 (Temperature)", unit: "°C", ph: "0x6666 (25°C)", calc: (r) => -46.85 + (175.72 * r / 65536), cFormula: "-46.85 + (175.72 * raw / 65536.0)", jsonKey: "temperature_c" },
+            sht20: { name: "SHT20 (Temperature)", unit: "°C", ph: "0x6666 (25°C)", calc: (r) => -46.85 + (175.72 * r / 65536), cFormula: "-46.85 + (175.72 * raw / 65536.0)", jsonKey: "temperature_c" },
+            mlx90614: { name: "MLX90614 (IR Temp)", unit: "°C", ph: "0x3C00 (36°C)", calc: (r) => (r * 0.02) - 273.15, cFormula: "(raw * 0.02) - 273.15", jsonKey: "temperature_c" },
+            adxl345: { name: "ADXL345 (Accel)", unit: "g", ph: "0x0100 (1g)", calc: (r) => toSigned16(r) * 0.0039, cFormula: "(int16_t)raw * 0.0039", jsonKey: "acceleration_g" },
+            lsm6ds3: { name: "LSM6DS3 (Accel)", unit: "g", ph: "0x4000 (1g)", calc: (r) => toSigned16(r) * 0.000061, cFormula: "(int16_t)raw * 0.000061", jsonKey: "acceleration_g" },
+            icm20948: { name: "ICM20948 (Accel)", unit: "g", ph: "0x4000 (1g)", calc: (r) => toSigned16(r) / 16384.0, cFormula: "(int16_t)raw / 16384.0", jsonKey: "acceleration_g" },
+            bmi160: { name: "BMI160 (Accel)", unit: "g", ph: "0x4000 (1g)", calc: (r) => toSigned16(r) / 16384.0, cFormula: "(int16_t)raw / 16384.0", jsonKey: "acceleration_g" },
+            hmc5883l: { name: "HMC5883L (Magnetometer)", unit: "mG", ph: "0x0100", calc: (r) => toSigned16(r) * 0.92, cFormula: "(int16_t)raw * 0.92", jsonKey: "magnetic_mG" },
+            qmc5883l: { name: "QMC5883L (Magnetometer)", unit: "mG", ph: "0x0100", calc: (r) => toSigned16(r) * 1.0, cFormula: "(int16_t)raw * 1.0", jsonKey: "magnetic_mG" },
+            bh1750: { name: "BH1750 (Light)", unit: "lux", ph: "0x0080 (106 lux)", calc: (r) => r / 1.2, cFormula: "raw / 1.2", jsonKey: "light_lux" },
+            veml7700: { name: "VEML7700 (Light)", unit: "lux", ph: "0x0100", calc: (r) => r * 0.0036, cFormula: "raw * 0.0036", jsonKey: "light_lux" },
+            vl6180x: { name: "VL6180X (Distance)", unit: "mm", ph: "0x0064 (100mm)", calc: (r) => r, cFormula: "raw", jsonKey: "distance_mm" },
+            ina226: { name: "INA226 (Bus Voltage)", unit: "V", ph: "0x2710", calc: (r) => toSigned16(r) * 0.00125, cFormula: "(int16_t)raw * 0.00125", jsonKey: "bus_voltage_v" },
+            max17048: { name: "MAX17048 (Battery V)", unit: "V", ph: "0xA000", calc: (r) => r * 0.000078125, cFormula: "raw * 0.000078125", jsonKey: "voltage_v" },
+            ads1015: { name: "ADS1015 (ADC)", unit: "V", ph: "0x0400", calc: (r) => toSigned16(r) * 0.003, cFormula: "(int16_t)raw * 0.003", jsonKey: "voltage_v" },
+            mcp3421: { name: "MCP3421 (ADC)", unit: "V", ph: "0x0100", calc: (r) => toSigned16(r) * 0.000015625, cFormula: "(int16_t)raw * 0.000015625", jsonKey: "voltage_v" },
+            lps25hb: { name: "LPS25HB (Pressure)", unit: "hPa", ph: "0x3E80 (1000hPa)", calc: (r) => r / 4096.0, cFormula: "raw / 4096.0", jsonKey: "pressure_hPa" },
+            ccs811: { name: "CCS811 (eCO2)", unit: "ppm", ph: "0x0190", calc: (r) => r, cFormula: "raw", jsonKey: "eco2_ppm" }
         };
 
-        // Populate dropdown on load
         window.onload = function() {
             const select = document.getElementById('sensorType');
             for (const [key, config] of Object.entries(sensorDB)) {
@@ -251,24 +175,18 @@
 
             if (isNaN(raw)) { alert("Please enter a valid Hex (0x...) or Decimal number."); return; }
 
-            // Calculate value
             let rawValue = config.calc(raw);
-            
-            // Format nicely: remove unnecessary trailing zeros
             let formattedValue = parseFloat(rawValue.toFixed(4)).toString();
             
-            // Generate C code
             let cCode = `// ${config.name} Reading\nint16_t raw = (buf[0] << 8) | buf[1];\nfloat val = ${config.cFormula};\n// Result: ${formattedValue} ${config.unit}`;
             
-            // Generate JSON
             let jsonObj = {
-                sensor: config.name.split(' ')[0], // Extract sensor name e.g., "TMP102"
+                sensor: config.name.split(' ')[0],
                 raw_hex: rawInput,
                 timestamp: new Date().toISOString()
             };
             jsonObj[config.jsonKey] = parseFloat(formattedValue);
 
-            // Update UI
             document.getElementById('finalValue').innerHTML = `${formattedValue} <span style="font-size: 16px; color: #cbd5e1;">${config.unit}</span>`;
             document.getElementById('formula').textContent = `Formula applied: ${config.cFormula.replace(/raw/g, rawInput)}`;
             document.getElementById('cCodeOutput').textContent = cCode;
